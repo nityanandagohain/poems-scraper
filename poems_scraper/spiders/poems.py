@@ -8,6 +8,7 @@ class PoemsSpider(scrapy.Spider):
     name = 'poems'
     # start_urls = ['https://www.poets.org/poetsorg/poems?field_poem_themes_tid=886']
     page_no = 1
+    theme_id = 0
     custom_settings = {
         # specifies exported fields and order
         'FEED_EXPORT_FIELDS': ["theme","poem"],
@@ -15,7 +16,7 @@ class PoemsSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs): 
         super(PoemsSpider, self).__init__(*args, **kwargs) 
 
-        print(kwargs.get('theme_id'))
+        PoemsSpider.theme_id = kwargs.get('theme_id')
         self.start_urls = ["https://www.poets.org/poetsorg/poems?field_poem_themes_tid={}".format(kwargs.get('theme_id'))]
 
     def parse(self, response):    
@@ -31,7 +32,7 @@ class PoemsSpider(scrapy.Spider):
                     yield response.follow(poem_link, callback=self.parse_poem, meta = {'theme': theme})
             except:
                 pass
-        next_link = "https://www.poets.org/poetsorg/poems?field_poem_themes_tid=886&page={}".format(PoemsSpider.page_no)
+        next_link = "https://www.poets.org/poetsorg/poems?field_poem_themes_tid={}&page={}".format(PoemsSpider.theme_id,PoemsSpider.page_no)
         if PoemsSpider.page_no < max_pages:
             PoemsSpider.page_no += 1
             yield response.follow(next_link, callback=self.parse)
